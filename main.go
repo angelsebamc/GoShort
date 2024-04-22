@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	r := gin.Default()
+	//Loading environment variables
+	errEnv := godotenv.Load()
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "all ol",
-		})
-	})
-	r.Run(":8080")
+	if errEnv != nil {
+		fmt.Println("Error loading .env")
+	}
+
 }
