@@ -15,16 +15,16 @@ type JWT struct {
 }
 
 var (
-	instance *JWT
-	once     sync.Once
+	jwt_instance *JWT
+	once         sync.Once
 )
 
-func GetInstance() *JWT {
+func GetJwtUtilsInstance() *JWT {
 	once.Do(func() {
 		secretKey := []byte(os.Getenv("JWT_SECRET"))
-		instance = &JWT{SecretKey: secretKey}
+		jwt_instance = &JWT{SecretKey: secretKey}
 	})
-	return instance
+	return jwt_instance
 }
 
 func (j *JWT) GenerateToken(user models.User) (string, error) {
