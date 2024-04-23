@@ -16,13 +16,13 @@ type UserRepository struct {
 
 var (
 	user_repository_instance *UserRepository
-	once                     sync.Once
+	once_user_repository     sync.Once
 )
 
 func GetUserRepository() *UserRepository {
-	once.Do(func() {
+	once_user_repository.Do(func() {
 		user_repository_instance = &UserRepository{
-			collection: utils.GetMongoDbClient().GetClient().Database("mydatabase").Collection("users"),
+			collection: utils.GetMongoDbClient().Client.Database("goshort").Collection("users"),
 		}
 	})
 
