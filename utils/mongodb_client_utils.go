@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"log"
+	"os"
 	"sync"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 )
 
 type MongoDbClient struct {
-	client *mongo.Client
+	Client *mongo.Client
 	ctx    context.Context
 }
 
@@ -25,7 +26,7 @@ func GetMongoDbClient() *MongoDbClient {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+		client, err := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv("MONGODB_CONNECTION")))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -36,18 +37,15 @@ func GetMongoDbClient() *MongoDbClient {
 			log.Fatal(err)
 		}
 
-		mongodb_client_instance = &MongoDbClient{client: client, ctx: ctx}
+		mongodb_client_instance = &MongoDbClient{Client: client, ctx: ctx}
+		log.Println("Connected to MongoDB")
 	})
 	return mongodb_client_instance
 }
 
-func (mc *MongoDbClient) GetClient() *mongo.Client {
-	return mc.client
-}
-
 func (mc *MongoDbClient) Disconnect() {
-	if mc.client != nil {
-		mc.client.Disconnect(mc.ctx)
+	if mc.Client != nil {
+		mc.Client.Disconnect(mc.ctx)
 		log.Println("DB disconnection was successful")
 	}
 }
