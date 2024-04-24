@@ -1,4 +1,12 @@
-package dtos
+package user_dtos
+
+import "time"
+
+type UserDTO_Info struct {
+	Username string    `json:"username" bson:"username"`
+	Email    string    `json:"email" bson:"username"`
+	Created  time.Time `json:"created" bson:"created"`
+}
 
 type UserDTO_Registration struct {
 	Username string `json:"username" validate:"required"`
