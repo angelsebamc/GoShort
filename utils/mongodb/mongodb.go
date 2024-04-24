@@ -1,4 +1,4 @@
-package utils
+package mongodb
 
 import (
 	"context"
@@ -11,13 +11,13 @@ import (
 )
 
 type MongoDb struct {
-	Client *mongo.Client
+	client *mongo.Client
 	ctx    context.Context
 }
 
 var mongodb_instance *MongoDb
 
-func GetMongoDb() *MongoDb {
+func GetInstance() *MongoDb {
 	if mongodb_instance == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
@@ -33,16 +33,21 @@ func GetMongoDb() *MongoDb {
 			log.Fatal(err)
 		}
 
-		mongodb_instance = &MongoDb{Client: client, ctx: ctx}
+		mongodb_instance = &MongoDb{client: client, ctx: ctx}
 		log.Println("Connected to MongoDB")
 	}
 
 	return mongodb_instance
 }
 
-func DisconnectMongoDb() {
-	if mongodb_instance.Client != nil {
-		mongodb_instance.Client.Disconnect(mc.ctx)
+func (m *MongoDb) Disconnect() {
+	if mongodb_instance.client != nil {
+		mongodb_instance.client.Disconnect(m.ctx)
 		log.Println("DB disconnection was successful")
 	}
+}
+
+// getters
+func (m *MongoDb) GetClient() *mongo.Client {
+	return m.client
 }
