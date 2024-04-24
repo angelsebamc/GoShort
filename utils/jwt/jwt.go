@@ -4,27 +4,25 @@ import (
 	"fmt"
 	"goshort/models"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type JWT struct {
-	SecretKey []byte
+	secretKey []byte
 }
 
-var (
-	jwt_instance *JWT
-	once         sync.Once
-)
+var instance *JWT
 
-func GetJwtUtilsInstance() *JWT {
-	once.Do(func() {
+func GetInstance() *JWT {
+
+	if instance != nil {
 		secretKey := []byte(os.Getenv("JWT_SECRET"))
-		jwt_instance = &JWT{SecretKey: secretKey}
-	})
-	return jwt_instance
+		instance = &JWT{secretKey: secretKey}
+	}
+
+	return instance
 }
 
 func (j *JWT) GenerateToken(user models.User) (string, error) {
@@ -33,7 +31,7 @@ func (j *JWT) GenerateToken(user models.User) (string, error) {
 		"exp":      time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	tokenString, err := token.SignedString(j.SecretKey)
+	tokenString, err := token.SignedString(j.secretKey)
 
 	if err != nil {
 		return "", err
@@ -44,7 +42,7 @@ func (j *JWT) GenerateToken(user models.User) (string, error) {
 
 func (j *JWT) VerifyToken(tokenString string) error {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return j.SecretKey, nil
+		return j.secretKey, nil
 	})
 
 	if err != nil {
