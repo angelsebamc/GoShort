@@ -22,7 +22,7 @@ var (
 func GetUserRepository() *UserRepository {
 	once_user_repository.Do(func() {
 		user_repository_instance = &UserRepository{
-			collection: utils.GetMongoDbClient().Client.Database("goshort").Collection("users"),
+			collection: utils.GetMongoDb().Client.Database("goshort").Collection("users"),
 		}
 	})
 

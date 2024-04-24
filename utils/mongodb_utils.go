@@ -4,25 +4,21 @@ import (
 	"context"
 	"log"
 	"os"
-	"sync"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type MongoDbClient struct {
+type MongoDb struct {
 	Client *mongo.Client
 	ctx    context.Context
 }
 
-var (
-	mongodb_client_instance *MongoDbClient
-	once_mongodb_client     sync.Once
-)
+var mongodb_instance *MongoDb
 
-func GetMongoDbClient() *MongoDbClient {
-	once_mongodb_client.Do(func() {
+func GetMongoDb() *MongoDb {
+	if mongodb_instance == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
@@ -37,15 +33,16 @@ func GetMongoDbClient() *MongoDbClient {
 			log.Fatal(err)
 		}
 
-		mongodb_client_instance = &MongoDbClient{Client: client, ctx: ctx}
+		mongodb_instance = &MongoDb{Client: client, ctx: ctx}
 		log.Println("Connected to MongoDB")
-	})
-	return mongodb_client_instance
+	}
+
+	return mongodb_instance
 }
 
-func (mc *MongoDbClient) Disconnect() {
-	if mc.Client != nil {
-		mc.Client.Disconnect(mc.ctx)
+func DisconnectMongoDb() {
+	if mongodb_instance.Client != nil {
+		mongodb_instance.Client.Disconnect(mc.ctx)
 		log.Println("DB disconnection was successful")
 	}
 }
