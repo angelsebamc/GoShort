@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type UserRepository struct {
@@ -19,9 +20,24 @@ var instance *UserRepository
 
 func GetInstance() *UserRepository {
 	if instance == nil {
-		instance = &UserRepository{
+		new_user_repo := &UserRepository{
 			collection: mongodb.GetInstance().GetClient().Database("goshort").Collection("users"),
 		}
+
+		uniqueEmail := mongo.IndexModel{
+			Keys: bson.M{
+				"email": 1,
+			},
+			Options: options.Index().SetUnique(true),
+		}
+
+		_, err := new_user_repo.collection.Indexes().CreateOne(context.Background(), uniqueEmail)
+
+		if err != nil {
+			panic(err)
+		}
+
+		instance = new_user_repo
 	}
 	return instance
 }
@@ -38,9 +54,7 @@ func (ur *UserRepository) CreateUser(user *models.User) (*user_dtos.UserDTO_Info
 		return nil, err
 	}
 
-	insertedID := result.InsertedID.(primitive.ObjectID).Hex()
-
-	createdUser := instance.GetUserById(insertedID)
+	createdUser := instance.GetUserById(result.InsertedID.(primitive.ObjectID))
 
 	if createdUser == nil {
 		return nil, err
