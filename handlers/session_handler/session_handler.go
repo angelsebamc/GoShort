@@ -46,7 +46,7 @@ func Login(c *gin.Context) {
 	token, status := user_service.GetInstance().GetUserByEmail(user.Email)
 
 	if status.Code != http.StatusOK {
-		c.JSON(int(status.Code), json_response.New(http.StatusInternalServerError, status.Message, nil))
+		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
 	}
 
 	user_with_token := &user_dto.UserDTO_Info_Token{
