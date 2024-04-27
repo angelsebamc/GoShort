@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
 	"time"
@@ -24,7 +25,7 @@ func GetInstance() *MongoDb {
 
 		client, err := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv("MONGODB_CONNECTION")))
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(errors.New("Mongodb: " + err.Error()))
 		}
 
 		// Verify the client is connected
