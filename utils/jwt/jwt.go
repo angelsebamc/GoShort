@@ -1,8 +1,8 @@
-package utils
+package jwt
 
 import (
 	"fmt"
-	"goshort/models"
+	"goshort/dtos/user_dto"
 	"os"
 	"time"
 
@@ -17,7 +17,7 @@ var instance *JWT
 
 func GetInstance() *JWT {
 
-	if instance != nil {
+	if instance == nil {
 		secretKey := []byte(os.Getenv("JWT_SECRET"))
 		instance = &JWT{secretKey: secretKey}
 	}
@@ -25,7 +25,7 @@ func GetInstance() *JWT {
 	return instance
 }
 
-func (j *JWT) GenerateToken(user models.User) (string, error) {
+func (j *JWT) GenerateToken(user *user_dto.UserDTO_Info) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": user.Username,
 		"exp":      time.Now().Add(time.Hour * 24).Unix(),
