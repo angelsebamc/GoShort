@@ -12,12 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type LoginHandler struct{}
-
-func NewLoginHandler() *LoginHandler {
-	return &LoginHandler{}
-}
-
 func Register(c *gin.Context) {
 	var new_user user_dto.UserDTO_Registration
 
