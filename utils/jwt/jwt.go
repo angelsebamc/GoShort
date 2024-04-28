@@ -58,6 +58,7 @@ func (j *JWT) VerifyToken(tokenString string) error {
 }
 
 func (j *JWT) ExtractTokenClaims(tokenString string) (jwt.MapClaims, error) {
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return j.secretKey, nil
 	})

@@ -7,7 +7,7 @@ import (
 
 const short_url_length = 6
 
-func CreateShortURL(orignal_url string) string {
+func CreateShortURL() string {
 	base_url := os.Getenv("BASE_URL")
 	short_url := utils.GenerateRandomString(short_url_length)
 
