@@ -24,12 +24,10 @@ func GetInstance() *LinkRepository {
 			collection: mongodb.GetInstance().GetClient().Database("goshort").Collection("links"),
 		}
 
+		keys := bson.D{{Key: "short_url", Value: 1}, {Key: "original_url", Value: 1}, {Key: "user_id", Value: 1}}
+
 		uniqueFields := mongo.IndexModel{
-			Keys: bson.M{
-				"short_url":    1,
-				"original_url": 1,
-				"user_id":      1,
-			},
+			Keys:    keys,
 			Options: options.Index().SetUnique(true),
 		}
 
@@ -74,6 +72,24 @@ func (lr *LinkRepository) GetLinkById(id primitive.ObjectID) *link_dto.LinkDTO_G
 	var link models.Link
 
 	err := instance.collection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&link)
+	if err != nil {
+		return nil
+	}
+
+	return &link_dto.LinkDTO_Get{
+		ID:          link.ID.Hex(),
+		ShortUrl:    link.ShortUrl,
+		OriginalUrl: link.OriginalUrl,
+		UserID:      link.UserID,
+		Clicks:      link.Clicks,
+	}
+}
+
+func (lr *LinkRepository) GetLinkByOriginalUrl(original_url string) *link_dto.LinkDTO_Get {
+	var link models.Link
+
+	err := instance.collection.FindOne(context.Background(), bson.M{"original_url": original_url}).Decode(&link)
+
 	if err != nil {
 		return nil
 	}
