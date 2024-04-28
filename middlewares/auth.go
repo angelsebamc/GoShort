@@ -24,7 +24,7 @@ func Auth() gin.HandlerFunc {
 
 		request_bearer_jwt := c.Request.Header.Get("Authorization")
 		if request_bearer_jwt == "" {
-			c.AbortWithStatusJSON(c, json_response.New(http.StatusForbidden, "invalid token", nil))
+			c.AbortWithStatusJSON(http.StatusForbidden, json_response.New(http.StatusForbidden, "invalid token", nil))
 			return
 		}
 
