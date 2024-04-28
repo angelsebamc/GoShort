@@ -4,12 +4,9 @@ import (
 	"goshort/dtos/link_dto"
 	shortener_logic "goshort/logic"
 	"goshort/repositories/link_repository"
-	"goshort/repositories/user_repository"
 	"goshort/utils/http_status"
-	"goshort/utils/jwt"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type LinkService struct{}
@@ -29,38 +26,20 @@ func GetInstance() *LinkService {
 // the short url has to be unique and the original url has to be valid
 // if the original url has a short url, return the short url
 func (ls *LinkService) CreateShortURL(c *gin.Context, link *link_dto.LinkDTO_Post) (*link_dto.LinkDTO_Get, *http_status.HTTPStatus) {
-	request_jwt := c.Request.Header.Get("Authorization")
-	if request_jwt == "" {
-		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: "invalid token"}
+	user_id_get, user_id_exists := c.Get("user_id")
+
+	if !user_id_exists {
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusBadRequest, Message: "user does not exist"}
 	}
 
-	jwt_claims, claims_err := jwt.GetInstance().ExtractTokenClaims(request_jwt)
+	user_id := user_id_get.(string)
 
-	if claims_err != nil {
-		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: claims_err.Error()}
-	}
-
-	//try to get user from jwt claims
-	user_id := jwt_claims["id"].(string)
-
-	user_object_id, err := primitive.ObjectIDFromHex(user_id)
-	if err != nil {
-		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
-	}
-
-	user_from_db := user_repository.GetInstance().GetUserById(user_object_id)
-
-	if user_from_db == nil {
-		return nil, &http_status.HTTPStatus{Code: http_status.StatusUnauthorized, Message: "user not found"}
-	}
-
-	//creates a new short link
-	short_link := shortener_logic.CreateShortURL(link.OriginalUrl)
+	short_link := shortener_logic.CreateShortURL()
 
 	new_link := &link_dto.LinkDTO_Info{
 		ShortUrl:    short_link,
 		OriginalUrl: link.OriginalUrl,
-		UserID:      user_from_db.ID,
+		UserID:      user_id,
 	}
 
 	new_link_db, err := link_repository.GetInstance().AddLink(new_link)
@@ -70,4 +49,14 @@ func (ls *LinkService) CreateShortURL(c *gin.Context, link *link_dto.LinkDTO_Pos
 	}
 
 	return new_link_db, &http_status.HTTPStatus{Code: http_status.StatusCreated, Message: "short link created"}
+}
+
+func (ls *LinkService) GetLinkByOriginalUrl(original_url string) (*link_dto.LinkDTO_Get, *http_status.HTTPStatus) {
+	link := link_repository.GetInstance().GetLinkByOriginalUrl(original_url)
+
+	if link == nil {
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusNotFound, Message: "link not found"}
+	}
+
+	return link, &http_status.HTTPStatus{Code: http_status.StatusOK, Message: "link found"}
 }
