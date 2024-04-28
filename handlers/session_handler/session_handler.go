@@ -8,6 +8,7 @@ import (
 	"goshort/utils/json_response"
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -49,11 +50,16 @@ func Login(c *gin.Context) {
 		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
 	}
 
+	session := sessions.Default(c)
+	session.Set("token", token.Token)
+
+	session.Save()
+
 	user_with_token := &user_dto.UserDTO_Info_Token{
 		Username: token.Username,
 		Email:    token.Email,
 		Token:    token.Token,
 	}
 
-	c.JSON(http.StatusOK, user_with_token)
+	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, user_with_token))
 }

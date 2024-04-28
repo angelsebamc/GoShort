@@ -3,7 +3,11 @@ package main
 import (
 	"fmt"
 	session_routes "goshort/routes"
+	"goshort/utils"
+	"os"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -18,7 +22,11 @@ func main() {
 		fmt.Println("Error loading .env")
 	}
 
+	//setup session
+	store := cookie.NewStore([]byte(utils.GenerateRandomString(64)))
+	router.Use(sessions.Sessions("goshort", store))
+
 	session_routes.SetupRoutes(router)
 
-	router.Run(":8080")
+	router.Run(os.Getenv("PORT"))
 }
