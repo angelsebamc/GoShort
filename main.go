@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	session_routes "goshort/routes"
+	"goshort/routes/link_routes.go"
+	"goshort/routes/session_routes"
 	"goshort/utils"
 	"os"
 
@@ -26,7 +27,9 @@ func main() {
 	store := cookie.NewStore([]byte(utils.GenerateRandomString(64)))
 	router.Use(sessions.Sessions("goshort", store))
 
+	//setup routes
 	session_routes.SetupRoutes(router)
+	link_routes.SetupRoutes(router)
 
 	router.Run(os.Getenv("PORT"))
 }
