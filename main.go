@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"goshort/handlers/session_handler"
+	session_routes "goshort/routes"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	r := gin.Default()
+	router := gin.Default()
 
 	//Loading environment variables
 	errEnv := godotenv.Load()
@@ -18,9 +18,7 @@ func main() {
 		fmt.Println("Error loading .env")
 	}
 
-	//user hanlders
-	r.POST("/api/user/register", session_handler.Register)
-	r.POST("/api/user/login", session_handler.Login)
+	session_routes.SetupRoutes(router)
 
-	r.Run(":8080")
+	router.Run(":8080")
 }
