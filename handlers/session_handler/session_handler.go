@@ -51,7 +51,7 @@ func Login(c *gin.Context) {
 	}
 
 	session := sessions.Default(c)
-	session.Set("token", token.Token)
+	session.Set("email", token.Email)
 
 	session.Save()
 
@@ -62,4 +62,13 @@ func Login(c *gin.Context) {
 	}
 
 	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, user_with_token))
+}
+
+func Logout(c *gin.Context) {
+	session := sessions.Default(c)
+
+	session.Delete("email")
+	session.Save()
+
+	c.JSON(http.StatusOK, json_response.New(200, "Logged out", nil))
 }
