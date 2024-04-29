@@ -60,3 +60,13 @@ func (ls *LinkService) GetLinkByOriginalUrl(original_url string) (*link_dto.Link
 
 	return link, &http_status.HTTPStatus{Code: http_status.StatusOK, Message: "link found"}
 }
+
+func (ls *LinkService) GetLinkByShortUrl(short_url string) (*link_dto.LinkDTO_Get, *http_status.HTTPStatus) {
+	link := link_repository.GetInstance().GetLinkByShortUrl(short_url)
+
+	if link == nil {
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusNotFound, Message: "link not found"}
+	}
+
+	return link, &http_status.HTTPStatus{Code: http_status.StatusOK, Message: "link found"}
+}
