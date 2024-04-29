@@ -2,6 +2,7 @@ package link_repository
 
 import (
 	"context"
+	"errors"
 	"goshort/dtos/link_dto"
 	"goshort/models"
 	"goshort/utils/mongodb"
@@ -66,6 +67,26 @@ func (lr *LinkRepository) AddLink(link *link_dto.LinkDTO_Info) (*link_dto.LinkDT
 	}
 
 	return created_link, nil
+}
+
+func (lr *LinkRepository) RemoveLink(original_url string) (*link_dto.LinkDTO_Get, error) {
+	var link models.Link
+
+	delete_link := lr.collection.FindOneAndDelete(context.Background(), bson.M{"original_url": original_url}).Decode(&link)
+
+	if delete_link == nil {
+		return nil, errors.New("link not found")
+	}
+
+	returned_link := &link_dto.LinkDTO_Get{
+		ID:          link.ID.Hex(),
+		ShortUrl:    link.ShortUrl,
+		OriginalUrl: link.OriginalUrl,
+		UserID:      link.UserID,
+		Clicks:      link.Clicks,
+	}
+
+	return returned_link, nil
 }
 
 func (lr *LinkRepository) GetLinkById(id primitive.ObjectID) *link_dto.LinkDTO_Get {

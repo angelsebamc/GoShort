@@ -51,6 +51,16 @@ func (ls *LinkService) CreateShortURL(c *gin.Context, link *link_dto.LinkDTO_Pos
 	return new_link_db, &http_status.HTTPStatus{Code: http_status.StatusCreated, Message: "short link created"}
 }
 
+func (ls *LinkService) DeleteLinkWithShortUrl(short_url string) (*link_dto.LinkDTO_Get, *http_status.HTTPStatus) {
+	link := link_repository.GetInstance().GetLinkByShortUrl(short_url)
+
+	if link == nil {
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusNotFound, Message: "link not found"}
+	}
+
+	return link, &http_status.HTTPStatus{Code: http_status.StatusOK, Message: "link found"}
+}
+
 func (ls *LinkService) GetLinkByOriginalUrl(original_url string) (*link_dto.LinkDTO_Get, *http_status.HTTPStatus) {
 	link := link_repository.GetInstance().GetLinkByOriginalUrl(original_url)
 
