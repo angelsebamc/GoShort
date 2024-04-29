@@ -10,18 +10,37 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CreateNewShortUrl(c *gin.Context) {
+func CreateShortUrl(c *gin.Context) {
 	link_body, _ := c.Get("link_body")
 
-	original_link := link_body.(link_dto.LinkDTO_Post)
+	link := link_body.(link_dto.LinkDTO_Post)
 
-	new_link, status := link_service.GetInstance().CreateShortURL(c, &original_link)
+	new_link, status := link_service.GetInstance().CreateShortURL(c, &link)
 
 	if status.Code != http.StatusCreated {
-		c.JSON(http.StatusInternalServerError, json_response.New(status.Code, status.Message, nil))
+		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
 	}
 
-	c.JSON(http.StatusCreated, json_response.New(status.Code, status.Message, new_link))
+	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, new_link))
+}
+
+func DeleteShortUrl(c *gin.Context) {
+	var link_from_body link_dto.LinkDTO_Delete
+
+	if err := c.BindJSON(&link_from_body); err != nil {
+		c.AbortWithStatusJSON(http.StatusForbidden, json_response.New(http.StatusForbidden, "No id provided", nil))
+		return
+	}
+
+	link_id := link_from_body.ID
+
+	deleted_link, status := link_service.GetInstance().DeleteLinkById(link_id)
+
+	if status.Code != http.StatusCreated {
+		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
+	}
+
+	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, deleted_link))
 }
 
 func ShortUrlRedirect(c *gin.Context) {
@@ -32,7 +51,7 @@ func ShortUrlRedirect(c *gin.Context) {
 	link, status := link_service.GetInstance().GetLinkByShortUrl(join_with_base)
 
 	if status.Code != http.StatusOK {
-		c.JSON(http.StatusInternalServerError, json_response.New(status.Code, status.Message, nil))
+		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
 	}
 
 	c.Redirect(http.StatusPermanentRedirect, link.OriginalUrl)
