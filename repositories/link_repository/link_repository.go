@@ -102,3 +102,21 @@ func (lr *LinkRepository) GetLinkByOriginalUrl(original_url string) *link_dto.Li
 		Clicks:      link.Clicks,
 	}
 }
+
+func (lr *LinkRepository) GetLinkByShortUrl(short_url string) *link_dto.LinkDTO_Get {
+	var link models.Link
+
+	err := instance.collection.FindOne(context.Background(), bson.M{"short_url": short_url}).Decode(&link)
+
+	if err != nil {
+		return nil
+	}
+
+	return &link_dto.LinkDTO_Get{
+		ID:          link.ID.Hex(),
+		ShortUrl:    link.ShortUrl,
+		OriginalUrl: link.OriginalUrl,
+		UserID:      link.UserID,
+		Clicks:      link.Clicks,
+	}
+}
