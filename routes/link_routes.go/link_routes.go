@@ -10,8 +10,8 @@ import (
 func SetupRoutes(router *gin.Engine) {
 	sessionGroup := router.Group("/api/link")
 	{
-		sessionGroup.POST("/create", middlewares.ValidateURL(), middlewares.Auth(), middlewares.UrlExistsForTheUser(), link_handler.CreateShortUrl)
-		sessionGroup.DELETE("/delete", middlewares.Auth(), link_handler.DeleteShortUrl)
+		sessionGroup.POST("/create", middlewares.ValidateURL(), middlewares.Auth(), middlewares.UrlExistsForTheUser(), link_handler.CreateLink)
+		sessionGroup.DELETE("/delete", middlewares.Auth(), link_handler.DeleteLink)
 	}
 
 	//shorten url

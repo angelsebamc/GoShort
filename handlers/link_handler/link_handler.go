@@ -10,12 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CreateShortUrl(c *gin.Context) {
+func CreateLink(c *gin.Context) {
 	link_body, _ := c.Get("link_body")
 
 	link := link_body.(link_dto.LinkDTO_Post)
 
-	new_link, status := link_service.GetInstance().CreateShortURL(c, &link)
+	new_link, status := link_service.GetInstance().CreateLink(c, &link)
 
 	if status.Code != http.StatusCreated {
 		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
@@ -24,7 +24,7 @@ func CreateShortUrl(c *gin.Context) {
 	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, new_link))
 }
 
-func DeleteShortUrl(c *gin.Context) {
+func DeleteLink(c *gin.Context) {
 	var link_from_body link_dto.LinkDTO_Delete
 
 	if err := c.BindJSON(&link_from_body); err != nil {

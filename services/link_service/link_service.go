@@ -22,7 +22,7 @@ func GetInstance() *LinkService {
 }
 
 // methods
-func (ls *LinkService) CreateShortURL(c *gin.Context, link *link_dto.LinkDTO_Post) (*link_dto.LinkDTO_Get, *http_status.HTTPStatus) {
+func (ls *LinkService) CreateLink(c *gin.Context, link *link_dto.LinkDTO_Post) (*link_dto.LinkDTO_Get, *http_status.HTTPStatus) {
 	//TODO: maybe i can get this from the handler
 	user_id_get, user_id_exists := c.Get("user_id")
 
