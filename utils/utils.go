@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/base64"
 	"math/rand"
+	"regexp"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -26,4 +27,14 @@ func GenerateRandomString(length int) string {
 	random_string_b64 := base64.URLEncoding.EncodeToString(random_string)
 
 	return string(random_string_b64)
+}
+
+func ValidateURL(url string) bool {
+	match, err := regexp.MatchString(`^https://www\..+`, url)
+
+	if err != nil {
+		return false
+	}
+
+	return match
 }

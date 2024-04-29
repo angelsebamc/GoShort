@@ -3,18 +3,44 @@ package middlewares
 import (
 	"goshort/dtos/link_dto"
 	"goshort/services/link_service"
+	"goshort/utils"
 	"goshort/utils/json_response"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+func ValidateURL() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		link_body, exists := c.Get("link_body")
+
+		if !exists {
+			c.JSON(http.StatusNotFound, json_response.New(http.StatusNotFound, "url not given", nil))
+			return
+		}
+
+		link, _ := link_body.(link_dto.LinkDTO_Post)
+
+		log.Printf(link.OriginalUrl)
+
+		is_valid_url := utils.ValidateURL(link.OriginalUrl)
+
+		if !is_valid_url {
+			c.JSON(http.StatusForbidden, json_response.New(http.StatusForbidden, "Invalid URL. Please provide de complete path", nil))
+			return
+		}
+		c.Next()
+	}
+}
 
 func UrlExistsForTheUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user_id, exists := c.Get("user_id")
 
 		if !exists {
-			c.AbortWithStatusJSON(403, json_response.New(404, "user does not exists", nil))
+			c.AbortWithStatusJSON(http.StatusNotFound, json_response.New(http.StatusNotFound, "user does not exists", nil))
+			return
 		}
 
 		var link_from_body link_dto.LinkDTO_Post
