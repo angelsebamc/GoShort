@@ -72,6 +72,7 @@ func (ur *UserRepository) GetUserById(id primitive.ObjectID) *user_dtos.UserDTO_
 	}
 
 	return &user_dtos.UserDTO_Info{
+		ID:       user.ID.Hex(),
 		Username: user.Username,
 		Email:    user.Email,
 		Created:  user.Created,
@@ -87,6 +88,7 @@ func (ur *UserRepository) GetUserByEmail(email string) *user_dtos.UserDTO_Info {
 	}
 
 	return &user_dtos.UserDTO_Info{
+		ID:       user.ID.Hex(),
 		Username: user.Username,
 		Email:    user.Email,
 		Created:  user.Created,

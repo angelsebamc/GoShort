@@ -8,14 +8,9 @@ import (
 	"goshort/utils/json_response"
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
-
-type LoginHandler struct{}
-
-func NewLoginHandler() *LoginHandler {
-	return &LoginHandler{}
-}
 
 func Register(c *gin.Context) {
 	var new_user user_dto.UserDTO_Registration
@@ -46,8 +41,13 @@ func Login(c *gin.Context) {
 	token, status := user_service.GetInstance().GetUserByEmail(user.Email)
 
 	if status.Code != http.StatusOK {
-		c.JSON(int(status.Code), json_response.New(http.StatusInternalServerError, status.Message, nil))
+		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
 	}
+
+	session := sessions.Default(c)
+	session.Set("email", token.Email)
+
+	session.Save()
 
 	user_with_token := &user_dto.UserDTO_Info_Token{
 		Username: token.Username,
@@ -55,5 +55,14 @@ func Login(c *gin.Context) {
 		Token:    token.Token,
 	}
 
-	c.JSON(http.StatusOK, user_with_token)
+	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, user_with_token))
+}
+
+func Logout(c *gin.Context) {
+	session := sessions.Default(c)
+
+	session.Delete("email")
+	session.Save()
+
+	c.JSON(http.StatusOK, json_response.New(200, "Logged out", nil))
 }

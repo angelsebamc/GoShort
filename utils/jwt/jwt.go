@@ -27,8 +27,9 @@ func GetInstance() *JWT {
 
 func (j *JWT) GenerateToken(user *user_dto.UserDTO_Info) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": user.Username,
-		"exp":      time.Now().Add(time.Hour * 24).Unix(),
+		"email": user.Email,
+		"id":    user.ID,
+		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	})
 
 	tokenString, err := token.SignedString(j.secretKey)
@@ -54,4 +55,27 @@ func (j *JWT) VerifyToken(tokenString string) error {
 	}
 
 	return nil
+}
+
+func (j *JWT) ExtractTokenClaims(tokenString string) (jwt.MapClaims, error) {
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return j.secretKey, nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("error trying to parse jwt token")
+	}
+
+	if !token.Valid {
+		return nil, fmt.Errorf("the token is not valid")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if !ok {
+		return nil, fmt.Errorf("error trying to parse jwt token claims")
+	}
+
+	return claims, nil
 }
