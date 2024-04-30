@@ -6,6 +6,7 @@ import (
 	"goshort/utils"
 	"goshort/utils/http_status"
 	"goshort/utils/jwt"
+	"sync"
 
 	"goshort/repositories/user_repository"
 
@@ -16,14 +17,17 @@ type UserService struct {
 	validate *validator.Validate
 }
 
-var instance *UserService
+var (
+	instance *UserService
+	once     sync.Once
+)
 
 func GetInstance() *UserService {
-	if instance == nil {
+	once.Do(func() {
 		instance = &UserService{
 			validate: validator.New(),
 		}
-	}
+	})
 	return instance
 }
 

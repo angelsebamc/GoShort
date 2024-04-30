@@ -5,6 +5,7 @@ import (
 	"goshort/dtos/link_dto"
 	"goshort/models"
 	"goshort/utils/mongodb"
+	"sync"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,10 +17,13 @@ type LinkRepository struct {
 	collection *mongo.Collection
 }
 
-var instance *LinkRepository
+var (
+	instance *LinkRepository
+	once     sync.Once
+)
 
 func GetInstance() *LinkRepository {
-	if instance == nil {
+	once.Do(func() {
 		new_link_repo := &LinkRepository{
 			collection: mongodb.GetInstance().GetClient().Database("goshort").Collection("links"),
 		}
@@ -38,7 +42,7 @@ func GetInstance() *LinkRepository {
 		}
 
 		instance = new_link_repo
-	}
+	})
 	return instance
 }
 

@@ -5,6 +5,7 @@ import (
 	shortener_logic "goshort/logic"
 	"goshort/repositories/link_repository"
 	"goshort/utils/http_status"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -12,12 +13,15 @@ import (
 
 type LinkService struct{}
 
-var instance *LinkService
+var (
+	instance *LinkService
+	once     sync.Once
+)
 
 func GetInstance() *LinkService {
-	if instance == nil {
+	once.Do(func() {
 		instance = &LinkService{}
-	}
+	})
 	return instance
 }
 

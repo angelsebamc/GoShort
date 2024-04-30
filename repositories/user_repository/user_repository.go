@@ -5,6 +5,7 @@ import (
 	user_dtos "goshort/dtos/user_dto"
 	"goshort/models"
 	"goshort/utils/mongodb"
+	"sync"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,10 +17,13 @@ type UserRepository struct {
 	collection *mongo.Collection
 }
 
-var instance *UserRepository
+var (
+	instance *UserRepository
+	once     sync.Once
+)
 
 func GetInstance() *UserRepository {
-	if instance == nil {
+	once.Do(func() {
 		new_user_repo := &UserRepository{
 			collection: mongodb.GetInstance().GetClient().Database("goshort").Collection("users"),
 		}
@@ -38,7 +42,7 @@ func GetInstance() *UserRepository {
 		}
 
 		instance = new_user_repo
-	}
+	})
 	return instance
 }
 
