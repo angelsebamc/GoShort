@@ -70,7 +70,11 @@ func (lr *LinkRepository) AddLink(link *link_dto.LinkDTO_Info) (*link_dto.LinkDT
 
 	result, err := lr.collection.InsertOne(context.Background(), newLink)
 
-	created_link := instance.GetLinkById(result.InsertedID.(primitive.ObjectID))
+	if err != nil {
+		return nil, err
+	}
+
+	created_link, err := instance.GetLinkById(result.InsertedID.(primitive.ObjectID))
 
 	if created_link == nil {
 		return nil, err
@@ -94,9 +98,13 @@ func (lr *LinkRepository) updateLinkClicks(link_id primitive.ObjectID, clicks in
 func (lr *LinkRepository) DeleteLinkById(link_id primitive.ObjectID) (*link_dto.LinkDTO_Get, error) {
 	var link models.Link
 
-	err := lr.collection.FindOneAndDelete(context.Background(), bson.M{"_id": link_id}).Decode(&link)
+	result := lr.collection.FindOneAndDelete(context.Background(), bson.M{"_id": link_id})
 
-	if err != nil {
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	if err := result.Decode(&link); err != nil {
 		return nil, err
 	}
 
@@ -111,61 +119,80 @@ func (lr *LinkRepository) DeleteLinkById(link_id primitive.ObjectID) (*link_dto.
 	return returned_link, nil
 }
 
-func (lr *LinkRepository) GetLinkById(id primitive.ObjectID) *link_dto.LinkDTO_Get {
+func (lr *LinkRepository) GetLinkById(id primitive.ObjectID) (*link_dto.LinkDTO_Get, error) {
 	var link models.Link
 
-	err := instance.collection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&link)
-	if err != nil {
-		return nil
+	result := instance.collection.FindOne(context.Background(), bson.M{"_id": id})
+
+	if result.Err() != nil {
+		return nil, result.Err()
 	}
 
-	return &link_dto.LinkDTO_Get{
+	if err := result.Decode(&link); err != nil {
+		return nil, err
+	}
+
+	link_returned := &link_dto.LinkDTO_Get{
 		ID:          link.ID.Hex(),
 		ShortUrl:    link.ShortUrl,
 		OriginalUrl: link.OriginalUrl,
 		UserID:      link.UserID.Hex(),
 		Clicks:      link.Clicks,
 	}
+
+	return link_returned, nil
 }
 
-func (lr *LinkRepository) GetLinkByOriginalUrl(original_url string) *link_dto.LinkDTO_Get {
+func (lr *LinkRepository) GetLinkByOriginalUrl(original_url string) (*link_dto.LinkDTO_Get, error) {
 	var link models.Link
 
-	err := instance.collection.FindOne(context.Background(), bson.M{"original_url": original_url}).Decode(&link)
+	result := instance.collection.FindOne(context.Background(), bson.M{"original_url": original_url})
 
-	if err != nil {
-		return nil
+	if result.Err() != nil {
+		return nil, result.Err()
 	}
 
-	return &link_dto.LinkDTO_Get{
+	if err := result.Decode(&link); err != nil {
+		return nil, err
+	}
+
+	link_returned := &link_dto.LinkDTO_Get{
 		ID:          link.ID.Hex(),
 		ShortUrl:    link.ShortUrl,
 		OriginalUrl: link.OriginalUrl,
 		UserID:      link.UserID.Hex(),
 		Clicks:      link.Clicks,
 	}
+
+	return link_returned, nil
 }
 
-func (lr *LinkRepository) GetLinkByShortUrl(short_url string) *link_dto.LinkDTO_Get {
+func (lr *LinkRepository) GetLinkByShortUrl(short_url string) (*link_dto.LinkDTO_Get, error) {
 	var link models.Link
 
-	err := instance.collection.FindOne(context.Background(), bson.M{"short_url": short_url}).Decode(&link)
+	result := instance.collection.FindOne(context.Background(), bson.M{"short_url": short_url})
 
-	if err != nil {
-		return nil
+	if result.Err() != nil {
+		return nil, result.Err()
 	}
 
-	if err = instance.updateLinkClicks(link.ID, link.Clicks); err != nil {
-		return nil
+	if err := result.Decode(&link); err != nil {
+		return nil, err
 	}
 
-	return &link_dto.LinkDTO_Get{
+	if err := instance.updateLinkClicks(link.ID, link.Clicks); err != nil {
+		return nil, err
+	}
+
+	link_returned := &link_dto.LinkDTO_Get{
 		ID:          link.ID.Hex(),
 		ShortUrl:    link.ShortUrl,
 		OriginalUrl: link.OriginalUrl,
 		UserID:      link.UserID.Hex(),
-		Clicks:      link.Clicks + 1,
+		Clicks:      link.Clicks,
 	}
+
+	return link_returned, nil
 }
 
 func (lr *LinkRepository) GetLinksByUserId(user_id primitive.ObjectID) ([]*link_dto.LinkDTO_Get, error) {

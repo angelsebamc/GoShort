@@ -61,17 +61,21 @@ func (ls *LinkService) DeleteLinkById(link_id string) (*link_dto.LinkDTO_Get, *h
 		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
 	}
 
-	link, err_link := link_repository.GetInstance().DeleteLinkById(object_id)
+	link, err := link_repository.GetInstance().DeleteLinkById(object_id)
 
-	if err_link != nil {
-		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err_link.Error()}
+	if err != nil {
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
 	}
 
 	return link, &http_status.HTTPStatus{Code: http_status.StatusOK, Message: "link deleted"}
 }
 
 func (ls *LinkService) GetLinkByOriginalUrl(original_url string) (*link_dto.LinkDTO_Get, *http_status.HTTPStatus) {
-	link := link_repository.GetInstance().GetLinkByOriginalUrl(original_url)
+	link, err := link_repository.GetInstance().GetLinkByOriginalUrl(original_url)
+
+	if err != nil {
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
+	}
 
 	if link == nil {
 		return nil, &http_status.HTTPStatus{Code: http_status.StatusNotFound, Message: "link not found"}
@@ -81,7 +85,11 @@ func (ls *LinkService) GetLinkByOriginalUrl(original_url string) (*link_dto.Link
 }
 
 func (ls *LinkService) GetLinkByShortUrl(short_url string) (*link_dto.LinkDTO_Get, *http_status.HTTPStatus) {
-	link := link_repository.GetInstance().GetLinkByShortUrl(short_url)
+	link, err := link_repository.GetInstance().GetLinkByShortUrl(short_url)
+
+	if err != nil {
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
+	}
 
 	if link == nil {
 		return nil, &http_status.HTTPStatus{Code: http_status.StatusNotFound, Message: "link not found"}
