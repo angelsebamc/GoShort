@@ -56,3 +56,17 @@ func ShortUrlRedirect(c *gin.Context) {
 
 	c.Redirect(http.StatusPermanentRedirect, link.OriginalUrl)
 }
+
+func GetLinksByUserId(c *gin.Context) {
+	user_id_body, _ := c.Get("user_id")
+
+	user_id := user_id_body.(string)
+
+	deleted_link, status := link_service.GetInstance().GetLinksByUserId(user_id)
+
+	if status.Code != http.StatusCreated {
+		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
+	}
+
+	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, deleted_link))
+}

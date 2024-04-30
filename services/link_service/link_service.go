@@ -85,3 +85,20 @@ func (ls *LinkService) GetLinkByShortUrl(short_url string) (*link_dto.LinkDTO_Ge
 
 	return link, &http_status.HTTPStatus{Code: http_status.StatusOK, Message: "link found"}
 }
+
+func (ls *LinkService) GetLinksByUserId(user_id string) ([]*link_dto.LinkDTO_Get, *http_status.HTTPStatus) {
+
+	object_id, err := primitive.ObjectIDFromHex(user_id)
+
+	if err != nil {
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
+	}
+
+	links, err := link_repository.GetInstance().GetLinksByUserId(object_id)
+
+	if err != nil {
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
+	}
+
+	return links, &http_status.HTTPStatus{Code: http_status.StatusOK, Message: "retrieving links successfully"}
+}

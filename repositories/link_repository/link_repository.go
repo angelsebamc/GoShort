@@ -50,10 +50,17 @@ func (lr *LinkRepository) GetCollection() *mongo.Collection {
 //methods
 
 func (lr *LinkRepository) AddLink(link *link_dto.LinkDTO_Info) (*link_dto.LinkDTO_Get, error) {
+
+	user_id_primitive, err_casting := primitive.ObjectIDFromHex(link.UserID)
+
+	if err_casting != nil {
+		return nil, err_casting
+	}
+
 	newLink := models.Link{
 		ShortUrl:    link.ShortUrl,
 		OriginalUrl: link.OriginalUrl,
-		UserID:      link.UserID,
+		UserID:      user_id_primitive,
 		Clicks:      0,
 	}
 
@@ -66,6 +73,18 @@ func (lr *LinkRepository) AddLink(link *link_dto.LinkDTO_Info) (*link_dto.LinkDT
 	}
 
 	return created_link, nil
+}
+
+func (lr *LinkRepository) updateLinkClicks(link_id primitive.ObjectID, clicks int) error {
+	add_clicks := clicks + 1
+	filter := bson.D{{Key: "_id", Value: link_id}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "clicks", Value: add_clicks}}}}
+
+	_, err := lr.collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (lr *LinkRepository) DeleteLinkById(link_id primitive.ObjectID) (*link_dto.LinkDTO_Get, error) {
@@ -81,7 +100,7 @@ func (lr *LinkRepository) DeleteLinkById(link_id primitive.ObjectID) (*link_dto.
 		ID:          link.ID.Hex(),
 		ShortUrl:    link.ShortUrl,
 		OriginalUrl: link.OriginalUrl,
-		UserID:      link.UserID,
+		UserID:      link.UserID.Hex(),
 		Clicks:      link.Clicks,
 	}
 
@@ -100,7 +119,7 @@ func (lr *LinkRepository) GetLinkById(id primitive.ObjectID) *link_dto.LinkDTO_G
 		ID:          link.ID.Hex(),
 		ShortUrl:    link.ShortUrl,
 		OriginalUrl: link.OriginalUrl,
-		UserID:      link.UserID,
+		UserID:      link.UserID.Hex(),
 		Clicks:      link.Clicks,
 	}
 }
@@ -118,7 +137,7 @@ func (lr *LinkRepository) GetLinkByOriginalUrl(original_url string) *link_dto.Li
 		ID:          link.ID.Hex(),
 		ShortUrl:    link.ShortUrl,
 		OriginalUrl: link.OriginalUrl,
-		UserID:      link.UserID,
+		UserID:      link.UserID.Hex(),
 		Clicks:      link.Clicks,
 	}
 }
@@ -132,11 +151,52 @@ func (lr *LinkRepository) GetLinkByShortUrl(short_url string) *link_dto.LinkDTO_
 		return nil
 	}
 
+	if err = instance.updateLinkClicks(link.ID, link.Clicks); err != nil {
+		return nil
+	}
+
 	return &link_dto.LinkDTO_Get{
 		ID:          link.ID.Hex(),
 		ShortUrl:    link.ShortUrl,
 		OriginalUrl: link.OriginalUrl,
-		UserID:      link.UserID,
-		Clicks:      link.Clicks,
+		UserID:      link.UserID.Hex(),
+		Clicks:      link.Clicks + 1,
 	}
+}
+
+func (lr *LinkRepository) GetLinksByUserId(user_id primitive.ObjectID) ([]*link_dto.LinkDTO_Get, error) {
+	var links []*models.Link
+	var links_dtos []*link_dto.LinkDTO_Get
+
+	cursor, err := instance.collection.Find(context.Background(), bson.M{"user_id": user_id})
+
+	if err != nil {
+		return nil, err
+	}
+
+	for cursor.Next(context.Background()) {
+		var link models.Link
+		if err := cursor.Decode(&link); err != nil {
+			return nil, err
+		}
+		links = append(links, &link)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	for _, link := range links {
+		link_dto := &link_dto.LinkDTO_Get{
+			ID:          link.ID.Hex(),
+			ShortUrl:    link.ShortUrl,
+			OriginalUrl: link.OriginalUrl,
+			UserID:      link.UserID.Hex(),
+			Clicks:      link.Clicks,
+		}
+
+		links_dtos = append(links_dtos, link_dto)
+	}
+
+	return links_dtos, nil
 }
