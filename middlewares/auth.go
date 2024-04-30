@@ -57,7 +57,12 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 
-		user_from_db := user_repository.GetInstance().GetUserById(user_object_id)
+		user_from_db, err := user_repository.GetInstance().GetUserById(user_object_id)
+
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusForbidden, json_response.New(http.StatusInternalServerError, "error trying to get the user", nil))
+			return
+		}
 
 		if user_from_db == nil {
 			c.AbortWithStatusJSON(http.StatusForbidden, json_response.New(http.StatusNotFound, "user does not exists", nil))

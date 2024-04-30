@@ -58,7 +58,11 @@ func (ur *UserRepository) CreateUser(user *models.User) (*user_dtos.UserDTO_Info
 		return nil, err
 	}
 
-	createdUser := instance.GetUserById(result.InsertedID.(primitive.ObjectID))
+	createdUser, err := instance.GetUserById(result.InsertedID.(primitive.ObjectID))
+
+	if err != nil {
+		return nil, err
+	}
 
 	if createdUser == nil {
 		return nil, err
@@ -67,34 +71,49 @@ func (ur *UserRepository) CreateUser(user *models.User) (*user_dtos.UserDTO_Info
 	return createdUser, nil
 }
 
-func (ur *UserRepository) GetUserById(id primitive.ObjectID) *user_dtos.UserDTO_Info {
+// TODO: Do a generic method to retreive data by attributes
+func (ur *UserRepository) GetUserById(id primitive.ObjectID) (*user_dtos.UserDTO_Info, error) {
 	var user models.User
 
-	err := instance.collection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&user)
-	if err != nil {
-		return nil
+	result := instance.collection.FindOne(context.Background(), bson.M{"_id": id})
+
+	if result.Err() != nil {
+		return nil, result.Err()
 	}
 
-	return &user_dtos.UserDTO_Info{
+	if err := result.Decode(&user); err != nil {
+		return nil, err
+	}
+
+	returned_user := &user_dtos.UserDTO_Info{
 		ID:       user.ID.Hex(),
 		Username: user.Username,
 		Email:    user.Email,
 		Created:  user.Created,
 	}
+
+	return returned_user, nil
 }
 
-func (ur *UserRepository) GetUserByEmail(email string) *user_dtos.UserDTO_Info {
+func (ur *UserRepository) GetUserByEmail(email string) (*user_dtos.UserDTO_Info, error) {
 	var user models.User
 
-	err := instance.collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&user)
-	if err != nil {
-		return nil
+	result := instance.collection.FindOne(context.Background(), bson.M{"email": email})
+
+	if result.Err() != nil {
+		return nil, result.Err()
 	}
 
-	return &user_dtos.UserDTO_Info{
+	if err := result.Decode(&user); err != nil {
+		return nil, err
+	}
+
+	returned_user := &user_dtos.UserDTO_Info{
 		ID:       user.ID.Hex(),
 		Username: user.Username,
 		Email:    user.Email,
 		Created:  user.Created,
 	}
+
+	return returned_user, nil
 }

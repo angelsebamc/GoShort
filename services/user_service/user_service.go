@@ -39,7 +39,11 @@ func (us *UserService) CreateUser(user *user_dto.UserDTO_Registration) (*user_dt
 		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: errValidateUser.Error()}
 	}
 
-	userExists := user_repository.GetInstance().GetUserByEmail(user.Email)
+	userExists, err := user_repository.GetInstance().GetUserByEmail(user.Email)
+
+	if err != nil {
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
+	}
 
 	if userExists != nil {
 		return nil, &http_status.HTTPStatus{Code: http_status.StatusConflict, Message: "user already exists"}
@@ -79,7 +83,11 @@ func (us *UserService) CreateUser(user *user_dto.UserDTO_Registration) (*user_dt
 }
 
 func (us *UserService) GetUserByEmail(email string) (*user_dto.UserDTO_Info_Token, *http_status.HTTPStatus) {
-	user := user_repository.GetInstance().GetUserByEmail(email)
+	user, err := user_repository.GetInstance().GetUserByEmail(email)
+
+	if err != nil {
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
+	}
 
 	if user == nil {
 		return nil, &http_status.HTTPStatus{Code: http_status.StatusNotFound, Message: "user not found"}
