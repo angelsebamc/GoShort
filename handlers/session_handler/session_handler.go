@@ -42,6 +42,7 @@ func Login(c *gin.Context) {
 
 	if status.Code != http.StatusOK {
 		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
+		return
 	}
 
 	session := sessions.Default(c)
