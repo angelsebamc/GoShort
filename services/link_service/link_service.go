@@ -74,7 +74,7 @@ func (ls *LinkService) GetLinkByOriginalUrl(original_url string) (*link_dto.Link
 	link, err := link_repository.GetInstance().GetLinkByOriginalUrl(original_url)
 
 	if err != nil {
-		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusNotFound, Message: err.Error()}
 	}
 
 	if link == nil {
@@ -88,7 +88,7 @@ func (ls *LinkService) GetLinkByShortUrl(short_url string) (*link_dto.LinkDTO_Ge
 	link, err := link_repository.GetInstance().GetLinkByShortUrl(short_url)
 
 	if err != nil {
-		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusNotFound, Message: err.Error()}
 	}
 
 	if link == nil {

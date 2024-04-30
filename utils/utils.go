@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"encoding/base64"
 	"math/rand"
 	"regexp"
 
@@ -24,9 +23,7 @@ func GenerateRandomString(length int) string {
 		random_string[i] = charset[rand.Intn(len(charset))]
 	}
 
-	random_string_b64 := base64.URLEncoding.EncodeToString(random_string)
-
-	return string(random_string_b64)
+	return string(random_string)
 }
 
 func ValidateURL(url string) bool {
