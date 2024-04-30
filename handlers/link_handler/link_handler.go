@@ -54,7 +54,7 @@ func ShortUrlRedirect(c *gin.Context) {
 		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
 	}
 
-	c.Redirect(int(status.Code), link.OriginalUrl)
+	c.Redirect(http.StatusPermanentRedirect, link.OriginalUrl)
 }
 
 func GetLinksByUserId(c *gin.Context) {
