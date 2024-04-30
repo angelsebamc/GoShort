@@ -19,6 +19,7 @@ func CreateLink(c *gin.Context) {
 
 	if status.Code != http.StatusCreated {
 		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
+		return
 	}
 
 	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, new_link))
@@ -38,6 +39,7 @@ func DeleteLink(c *gin.Context) {
 
 	if status.Code != http.StatusCreated {
 		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
+		return
 	}
 
 	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, deleted_link))
@@ -52,6 +54,7 @@ func ShortUrlRedirect(c *gin.Context) {
 
 	if status.Code != http.StatusOK {
 		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
+		return
 	}
 
 	c.Redirect(http.StatusPermanentRedirect, link.OriginalUrl)
@@ -64,8 +67,9 @@ func GetLinksByUserId(c *gin.Context) {
 
 	deleted_link, status := link_service.GetInstance().GetLinksByUserId(user_id)
 
-	if status.Code != http.StatusCreated {
+	if status.Code != http.StatusOK {
 		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
+		return
 	}
 
 	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, deleted_link))
