@@ -37,7 +37,7 @@ func DeleteLink(c *gin.Context) {
 
 	deleted_link, status := link_service.GetInstance().DeleteLinkById(link_id)
 
-	if status.Code != http.StatusCreated {
+	if status.Code != http.StatusOK {
 		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
 		return
 	}
