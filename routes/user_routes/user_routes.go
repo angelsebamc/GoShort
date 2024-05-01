@@ -7,9 +7,9 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine) {
-	sessionGroup := router.Group("/api/user")
+	user_group := router.Group("/api/user")
 	{
-		sessionGroup.POST("/signin", user_handler.SignIn)
-		sessionGroup.POST("/auth", user_handler.Auth)
+		user_group.POST("/signin", user_handler.SignIn)
+		user_group.POST("/auth", user_handler.Auth)
 	}
 }
