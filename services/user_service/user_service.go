@@ -33,17 +33,13 @@ func GetInstance() *UserService {
 
 // methods
 func (us *UserService) CreateUser(user *user_dto.UserDTO_Registration) (*user_dto.UserDTO_Info_Token, *http_status.HTTPStatus) {
-	errValidateUser := us.validate.Struct(user)
-
-	if errValidateUser != nil {
-		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: errValidateUser.Error()}
-	}
-
-	userExists, err := user_repository.GetInstance().GetUserByEmail(user.Email)
+	err := us.validate.Struct(user)
 
 	if err != nil {
 		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
 	}
+
+	userExists, _ := user_repository.GetInstance().GetUserByEmail(user.Email)
 
 	if userExists != nil {
 		return nil, &http_status.HTTPStatus{Code: http_status.StatusConflict, Message: "user already exists"}
@@ -67,10 +63,10 @@ func (us *UserService) CreateUser(user *user_dto.UserDTO_Registration) (*user_dt
 		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
 	}
 
-	new_token, new_token_err := jwt.GetInstance().GenerateToken(new_user)
+	new_token, err := jwt.GetInstance().GenerateToken(new_user)
 
-	if new_token_err != nil {
-		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: new_token_err.Error()}
+	if err != nil {
+		return nil, &http_status.HTTPStatus{Code: http_status.StatusInternal, Message: err.Error()}
 	}
 
 	new_user_with_token := &user_dto.UserDTO_Info_Token{

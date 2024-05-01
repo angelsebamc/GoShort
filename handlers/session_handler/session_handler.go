@@ -25,6 +25,7 @@ func Register(c *gin.Context) {
 
 	if status.Code != http.StatusCreated {
 		c.JSON(http.StatusInternalServerError, json_response.New(status.Code, status.Message, nil))
+		return
 	}
 
 	c.JSON(http.StatusCreated, json_response.New(status.Code, status.Message, create_user))
