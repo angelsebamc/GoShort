@@ -1,7 +1,5 @@
 package session_handler
 
-//TODO: Login Handler
-
 import (
 	"goshort/dtos/user_dto"
 	"goshort/services/user_service"
@@ -24,11 +22,11 @@ func Register(c *gin.Context) {
 	create_user, status := user_service.GetInstance().CreateUser(&new_user)
 
 	if status.Code != http.StatusCreated {
-		c.JSON(http.StatusInternalServerError, json_response.New(status.Code, status.Message, nil))
+		c.JSON(int(status.Code), json_response.New(status.Code, status.Message, nil))
 		return
 	}
 
-	c.JSON(http.StatusCreated, json_response.New(status.Code, status.Message, create_user))
+	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, create_user))
 }
 
 func Login(c *gin.Context) {
