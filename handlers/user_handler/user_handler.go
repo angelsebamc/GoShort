@@ -1,4 +1,4 @@
-package session_handler
+package user_handler
 
 import (
 	"goshort/dtos/user_dto"
@@ -6,11 +6,10 @@ import (
 	"goshort/utils/json_response"
 	"net/http"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
-func Register(c *gin.Context) {
+func SignIn(c *gin.Context) {
 	var new_user user_dto.UserDTO_Registration
 
 	if err := c.BindJSON(&new_user); err != nil {
@@ -29,7 +28,7 @@ func Register(c *gin.Context) {
 	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, create_user))
 }
 
-func Login(c *gin.Context) {
+func Auth(c *gin.Context) {
 	var user user_dto.UserDTO_Login
 
 	if err := c.BindJSON(&user); err != nil {
@@ -44,11 +43,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	session := sessions.Default(c)
-	session.Set("email", token.Email)
-
-	session.Save()
-
 	user_with_token := &user_dto.UserDTO_Info_Token{
 		Username: token.Username,
 		Email:    token.Email,
@@ -56,13 +50,4 @@ func Login(c *gin.Context) {
 	}
 
 	c.JSON(int(status.Code), json_response.New(status.Code, status.Message, user_with_token))
-}
-
-func Logout(c *gin.Context) {
-	session := sessions.Default(c)
-
-	session.Delete("email")
-	session.Save()
-
-	c.JSON(http.StatusOK, json_response.New(200, "Logged out", nil))
 }

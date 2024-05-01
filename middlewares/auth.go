@@ -7,21 +7,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		session := sessions.Default(c)
-		email := session.Get("email")
-
-		if email == nil {
-			c.AbortWithStatusJSON(http.StatusForbidden, json_response.New(http.StatusForbidden, "unauthorized", nil))
-			return
-		}
-
 		request_bearer_jwt := c.Request.Header.Get("Authorization")
 		if request_bearer_jwt == "" {
 			c.AbortWithStatusJSON(http.StatusForbidden, json_response.New(http.StatusForbidden, "invalid token", nil))
@@ -44,11 +35,6 @@ func Auth() gin.HandlerFunc {
 
 		email_claim := jwt_claims["email"].(string)
 		user_id_claim := jwt_claims["id"].(string)
-
-		if email != email_claim {
-			c.AbortWithStatusJSON(http.StatusForbidden, json_response.New(http.StatusForbidden, "invalid user", nil))
-			return
-		}
 
 		user_object_id, err := primitive.ObjectIDFromHex(user_id_claim)
 

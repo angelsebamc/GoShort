@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"goshort/routes/link_routes.go"
-	"goshort/routes/session_routes"
+	"goshort/routes/user_routes"
 	"goshort/utils"
 	"goshort/utils/json_response"
 	"net/http"
@@ -35,7 +35,7 @@ func main() {
 	})
 
 	//setup routes
-	session_routes.SetupRoutes(router)
+	user_routes.SetupRoutes(router)
 	link_routes.SetupRoutes(router)
 
 	router.Run(os.Getenv("PORT"))
