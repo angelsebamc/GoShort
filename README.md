@@ -61,7 +61,7 @@ Working on a basic URL Shortener API made with GO
 #### Delete a Link
 
 ```http
-  POST /api/link/delete
+  DELETE /api/link/delete
 ```
 
 > 🔒 Requires a JWT token in the Authorization headers.
